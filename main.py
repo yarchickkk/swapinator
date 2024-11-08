@@ -3,8 +3,11 @@ import json
 import torch
 from torch import nn as nn
 
+
 ERROR = "\033[1;31m(swapinator)\033[0m"
 SPACE = " " * 12
+LEARNING_RATE = 1000.0
+INITIAL_DEPOSIT = 2192.0
 
 
 class Swapinator(nn.Module):
@@ -14,40 +17,53 @@ class Swapinator(nn.Module):
 
         # get pool attributes safely
         self.__validate_and_unpack(pool_data)
-        # set initial deposit value
-        self.input_usd = torch.tensor(2192.0, dtype=torch.float64)
+        # set initial deposit value - the optimized parameter, requires gradient
+        self.input_usd = nn.Parameter(torch.tensor(INITIAL_DEPOSIT, dtype=torch.float64, requires_grad=True))
 
     def forward(self, percent: float) -> float:
-        # convert USD to core tokens
-        core_input = self.input_usd / self.core_price_usd
-        # apply the uniswap fee of 0.3%
-        effective_core_input = core_input * torch.tensor(0.997, dtype=torch.float64)
-        # compute paired tokens obtained for core
-        paired_output = (self.paired_reserve * effective_core_input) / (self.core_reserve + effective_core_input)
+        # perhaps adding data dependent lr setting
+        optimizer = torch.optim.AdamW(params=[self.input_usd], lr=LEARNING_RATE, weight_decay=1e-4)
+        loss = torch.tensor(float("inf"), dtype=torch.float64)
         
-        # --- 
-        updated_core_reserve = self.core_reserve + effective_core_input
-        updated_paired_reserve = self.paired_reserve - paired_output
+        for i in range(100):
+            
+            print(f"{i} deposit: {self.input_usd.item()} $")
+            
+            # convert USD to core tokens
+            core_input = self.input_usd / self.core_price_usd
+            # apply the uniswap fee of 0.3%
+            effective_core_input = core_input * torch.tensor(0.997, dtype=torch.float64)
+            
+            # compute paired tokens obtained for core assets
+            paired_output = (self.paired_reserve * effective_core_input) / (self.core_reserve + effective_core_input)
+            
+            # get the new token ratio in the pool
+            updated_core_reserve = self.core_reserve + effective_core_input
+            updated_paired_reserve = self.paired_reserve - paired_output
+            
+            # --- purely optional check ---
+            flag = self.core_reserve * self.paired_reserve <= updated_core_reserve * updated_paired_reserve
+            print("Constant product maintained:", flag.item())
+            # -----------------------------
 
-        flag = self.core_reserve * self.paired_reserve <= updated_core_reserve * updated_paired_reserve
-        print("Constant product maintained:", flag.item())
-        # ---
+            # compute paired token price after swap
+            updated_paired_price_usd = (updated_core_reserve / updated_paired_reserve) * self.core_price_usd
+            
+            # measure paired token price growth (price difference is optional)
+            paired_price_diff = updated_paired_price_usd - self.paired_price_usd
+            paired_price_ratio = updated_paired_price_usd / self.paired_price_usd
+            print(f"Price difference: {paired_price_diff:.10f}")
+            print(f"Price ratio     : {paired_price_ratio:.10f}")
+            
+            loss = torch.square(torch.tensor(1.0 + percent / 100.0, dtype=torch.float64) - paired_price_ratio)
+            print(f"loss: {loss:.10f}", end="\n\n")
 
-        updated_paired_price_usd = (updated_core_reserve / updated_paired_reserve) * self.core_price_usd
-        
-        # ---
-        price_diff = updated_paired_price_usd - self.paired_price_usd
-        price_ratio = updated_paired_price_usd / self.paired_price_usd
-        print(f"Price difference: {price_diff:.10f}")
-        print(f"Price ratio     : {price_ratio:.10f}")
-        # ---
-
-        loss = torch.tensor(1.0 + percent / 100, dtype=torch.float64) - price_ratio
-        print(f"loss: {loss}")
-        # loss.backward()
-        pass
-        # optimizes start deposit to fit paired token target price change
-        # clears gradients, returns required deposit
+            # clear gradients 
+            optimizer.zero_grad(set_to_none=True)
+            # get new gradients
+            loss.backward()
+            # update parameter
+            optimizer.step()
 
     def __validate_and_unpack(self, pool_data: dict) -> None:
         # stop execution if pool_data is of wrong format
@@ -68,6 +84,27 @@ class Swapinator(nn.Module):
                      f"{SPACE} • ['data']['attributes']['base_token_price_usd'] : string convertible to float\n"
                      f"{SPACE} • ['data']['attributes']['reserve_in_usd']       : string convertible to float")
     
+    """ normalization stuff (simlply breaks the float with our numbers)
+    def __normalize_attrs(self) -> None:
+        with torch.no_grad():
+            # filter pool attributes used in forward pass
+            pool_attrs = {key: value for key, value in self.__dict__.items() if (key[0] != "_" and key != "training")}
+
+            # get extreme values
+            min_attr, max_attr = min(pool_attrs.values()), max(pool_attrs.values())
+
+            # apply min-max normalization
+            for key in self.__dict__:
+                if key[0] != "_" and key != "training":
+                    self.__dict__[key] = (self.__dict__[key] - min_attr) / (max_attr - min_attr)
+            
+            # save extremes for restoring
+            self.min_attr, self.max_attr = min_attr, max_attr
+
+    def restore_attr(self, attr: torch.Tensor) -> torch.Tensor:
+        return attr * (self.max_attr - self.min_attr) + self.min_attr
+    """
+
     def __repr__(self) -> str:
         return (
             f"Core token price   :{self.core_price_usd:>25.10f} $\n"
@@ -77,55 +114,12 @@ class Swapinator(nn.Module):
             f"Paired reserve     :{self.paired_reserve:>25.10f} tokens"
         )   
 
-    # optional
-    def __swap(self):
-        pass
-        # performs token swap
-    
-    def __optimize(self):
-        pass
-        # runs optimization loop
-
 
 with open("data/maga_pool_data.json") as f:
     maga_pool_data = json.load(f)
 
+
 swap = Swapinator(maga_pool_data)
 print(swap)
-swap(5)
-
-
-
-
-
-
-
-def swap(core_reserve: float, paired_reserve: float, input_amount: float, purchase_kind: str = "buy") -> float:
-    """
-    Perform a swap in an automated market maker (AMM) pool based on Uniswap's constant product formula.
-    """
-    input_reserve, output_reserve = (core_reserve, paired_reserve) if purchase_kind == "buy" else (paired_reserve, core_reserve)
-
-    effective_input = input_amount * 0.997  # apply the Uniswap fee of 0.3%
-    output_amount = (output_reserve * effective_input) / (input_reserve + effective_input)
-    return output_amount
-
-"""
-
-
-input_token_amount = float(data["data"][0]["attributes"]["from_token_amount"])
-
-output_token_amount = float(data["data"][0]["attributes"]["to_token_amount"])
-output_amount = swap(
-    core_reserve=core_token_reserve,
-    paired_reserve=paired_token_reserve,
-    input_amount=input_token_amount,
-    purchase_kind=purchase_kind
-)
-
-price = paired_token_price_usd if purchase_kind == "buy" else core_token_price_usd
-res = abs(output_token_amount - output_amount) * price
-print(res)
-"""
-
+swap(percent=0.3)
 
