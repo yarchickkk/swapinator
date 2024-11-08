@@ -3,62 +3,62 @@
         "id": "eth_0x0c3fdf9c70835f9be9db9585ecb6a1ee3f20a6c7",
         "type": "pool",
         "attributes": {
-            "base_token_price_usd": "0.000122927697637844",
-            "base_token_price_native_currency": "0.0000000463610151235753",
-            "quote_token_price_usd": "2656.39769345657",
+            "base_token_price_usd": "0.0000872902170313103",
+            "base_token_price_native_currency": "0.0000000299293095274836",
+            "quote_token_price_usd": "2915.32358791784",
             "quote_token_price_native_currency": "1.0",
-            "base_token_price_quote_token": "0.00000005",
-            "quote_token_price_base_token": "21569847",
+            "base_token_price_quote_token": "0.00000003",
+            "quote_token_price_base_token": "33412064",
             "address": "0x0c3fdf9c70835f9be9db9585ecb6a1ee3f20a6c7",
             "name": "MAGA / WETH",
             "pool_created_at": "2024-05-16T14:08:11Z",
-            "fdv_usd": "50810960",
-            "market_cap_usd": "50313267.5299581",
+            "fdv_usd": "36080556",
+            "market_cap_usd": "35614495.2167599",
             "price_change_percentage": {
-                "m5": "-1.36",
-                "h1": "0.05",
-                "h6": "-11.97",
-                "h24": "-35.51"
+                "m5": "0",
+                "h1": "5.97",
+                "h6": "13.59",
+                "h24": "0.09"
             },
             "transactions": {
                 "m5": {
                     "buys": 1,
-                    "sells": 3,
+                    "sells": 0,
                     "buyers": 1,
-                    "sellers": 3
+                    "sellers": 0
                 },
                 "m15": {
-                    "buys": 7,
-                    "sells": 15,
+                    "buys": 6,
+                    "sells": 10,
                     "buyers": 6,
-                    "sellers": 14
+                    "sellers": 9
                 },
                 "m30": {
-                    "buys": 15,
-                    "sells": 30,
-                    "buyers": 13,
-                    "sellers": 28
+                    "buys": 19,
+                    "sells": 26,
+                    "buyers": 14,
+                    "sellers": 20
                 },
                 "h1": {
-                    "buys": 27,
-                    "sells": 62,
-                    "buyers": 22,
-                    "sellers": 51
+                    "buys": 48,
+                    "sells": 36,
+                    "buyers": 28,
+                    "sellers": 28
                 },
                 "h24": {
-                    "buys": 2809,
-                    "sells": 2786,
-                    "buyers": 1361,
-                    "sellers": 1731
+                    "buys": 735,
+                    "sells": 763,
+                    "buyers": 420,
+                    "sellers": 522
                 }
             },
             "volume_usd": {
-                "m5": "11958.53048738",
-                "h1": "198009.063646398",
-                "h6": "5594876.47884503",
-                "h24": "18567290.553473"
+                "m5": "3345.84083118622",
+                "h1": "315472.11365378",
+                "h6": "1020398.63810717",
+                "h24": "3329627.32931592"
             },
-            "reserve_in_usd": "2896827.9615"
+            "reserve_in_usd": "2591817.8404"
         },
         "relationships": {
             "base_token": {

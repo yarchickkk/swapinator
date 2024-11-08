@@ -1,0 +1,84 @@
+{
+    "data": {
+        "id": "eth_0x308c6fbd6a14881af333649f17f2fde9cd75e2a6",
+        "type": "pool",
+        "attributes": {
+            "base_token_price_usd": "0.168813526472948",
+            "base_token_price_native_currency": "0.0000568800587861844",
+            "quote_token_price_usd": "2960.54635503632",
+            "quote_token_price_native_currency": "1.0",
+            "base_token_price_quote_token": "0.00005688",
+            "quote_token_price_base_token": "17580.85",
+            "address": "0x308c6fbd6a14881af333649f17f2fde9cd75e2a6",
+            "name": "DOGE / WETH",
+            "pool_created_at": "2024-08-20T01:58:35Z",
+            "fdv_usd": "165291013",
+            "market_cap_usd": "168824897.954104",
+            "price_change_percentage": {
+                "m5": "0.25",
+                "h1": "1.63",
+                "h6": "-4.09",
+                "h24": "59.48"
+            },
+            "transactions": {
+                "m5": {
+                    "buys": 4,
+                    "sells": 4,
+                    "buyers": 4,
+                    "sellers": 4
+                },
+                "m15": {
+                    "buys": 20,
+                    "sells": 16,
+                    "buyers": 18,
+                    "sellers": 15
+                },
+                "m30": {
+                    "buys": 41,
+                    "sells": 27,
+                    "buyers": 38,
+                    "sellers": 24
+                },
+                "h1": {
+                    "buys": 87,
+                    "sells": 70,
+                    "buyers": 75,
+                    "sellers": 61
+                },
+                "h24": {
+                    "buys": 3686,
+                    "sells": 2922,
+                    "buyers": 2012,
+                    "sellers": 1500
+                }
+            },
+            "volume_usd": {
+                "m5": "18859.1779558622",
+                "h1": "487216.726444546",
+                "h6": "7915434.01148433",
+                "h24": "25502502.0542235"
+            },
+            "reserve_in_usd": "4483059.5588"
+        },
+        "relationships": {
+            "base_token": {
+                "data": {
+                    "id": "eth_0x1121acc14c63f3c872bfca497d10926a6098aac5",
+                    "type": "token"
+                }
+            },
+            "quote_token": {
+                "data": {
+                    "id": "eth_0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "type": "token"
+                }
+            },
+            "dex": {
+                "data": {
+                    "id": "uniswap_v2",
+                    "type": "dex"
+                }
+            }
+        }
+    }
+}
